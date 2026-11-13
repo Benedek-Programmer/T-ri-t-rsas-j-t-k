@@ -1,0 +1,51 @@
+name: Telepitok keszitese (Windows es macOS)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Windows telepito (.exe) generalasa
+        run: |
+          mkdir -p input
+          javac -encoding UTF-8 *.java
+          printf "Main-Class: Main\n" > manifest.txt
+          jar cfm input/Jatek.jar manifest.txt *.class
+          jpackage --input input --name "WWI_Tarsasjatek" --main-jar Jatek.jar --main-class Main --type exe --app-version 1.0 --win-shortcut --win-menu --win-dir-chooser
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Telepito
+          path: "WWI_Tarsasjatek-1.0.exe"
+
+  macos-installer:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: macOS telepito (.dmg) generalasa
+        run: |
+          mkdir -p input
+          javac -encoding UTF-8 *.java
+          printf "Main-Class: Main\n" > manifest.txt
+          jar cfm input/Jatek.jar manifest.txt *.class
+          jpackage --input input --name "WWI_Tarsasjatek" --main-jar Jatek.jar --main-class Main --type dmg --app-version 1.0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macOS-Telepito
+          path: "WWI_Tarsasjatek-1.0.dmg"
